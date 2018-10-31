@@ -2,28 +2,14 @@ import paho.mqtt.client as mqtt
 import time
 
 
-
-def on_playsound(message):
-    if message.topic.endswith("baby/laugh"):
-        baby_laugh_sound.play()
-    elif message.topic.endswith("baby/cry"):
-        baby_cry_sound.play()
-    elif message.topic.endswith("scarface/laugh"):
-        scarface_laugh_sound.play()
-    elif message.topic.endswith("scarface/nomercy"):
-        scarface_no_mercy_sound.play()
-    else:
-        return
+server_address="localhost"
 
 def on_message(client, userdata, message):
     print("topic : ", message.topic)
-    on_playsound(message)
 
 def on_log(client, userdata, level, buf):
     print("log: ",buf)
 
-
-server_address="localhost"
 
 print("Creating client...")
 client = mqtt.Client("Scenario")
@@ -38,11 +24,11 @@ client.loop_start()
 print("Started")
 
 while True:
-    time.sleep(5)
     client.publish('halloween/victim/helpme', '1')
-    time.sleep(2)
-    client.publish('halloween/scarface/laugh', '2')
+    time.sleep(3)
     client.publish('halloween/light/start', '3')
+    time.sleep(4)
+    publishing('halloween/scarface/laugh', '2')
     time.sleep(2)
     client.publish('halloween/dog/bark', '4')
     time.sleep(2)
@@ -55,7 +41,7 @@ while True:
     client.publish('halloween/victim/helphelp', '8')
     time.sleep(2)
     client.publish('halloween/scarface/nomercy', '9')
-    time.sleep(2)
+    time.sleep(5)
     client.publish('halloween/dog/growl', '10')
     time.sleep(1)
     client.publish('halloween/victim/helphelp', '11')
@@ -63,5 +49,6 @@ while True:
     client.publish('halloween/baby/cry', '12')
     time.sleep(2)
     client.publish('halloween/scarface/laugh', '13')
+    time.sleep(15)
 
 client.loop_stop()

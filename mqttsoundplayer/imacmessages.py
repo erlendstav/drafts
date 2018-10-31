@@ -2,7 +2,12 @@ import pygame
 import paho.mqtt.client as mqtt
 import time
 
-sound_loc = "/Users/erlendstav/Halloween/Sounds/"
+#server_address="192.168.1.7"
+#server_address="10.218.87.156"
+server_address="localhost"
+
+sound_loc = "/Users/erlend/Halloween/Sounds/"
+#sound_loc = "/Users/erlendstav/Halloween/Sounds/"
 
 dog_bark_sound = ""
 dog_growl_sound = ""
@@ -22,7 +27,7 @@ def on_playsound(message):
         dog_growl_sound.play()
     elif message.topic.endswith("victim/helpme"):
         victim_helpme_sound.play()
-    elif message.topic.endswith("scarface/helphelp"):
+    elif message.topic.endswith("victim/helphelp"):
         victim_helphelp_sound.play()
     else:
         return
@@ -48,9 +53,6 @@ print("Helphelp...")
 victim_helphelp_sound = pygame.mixer.Sound(sound_loc + victim_helphelp_name)
 print("Sounds loaded")
 
-#server_address="192.168.1.7"
-#server_address="10.218.87.156"
-server_address="localhost"
 print("Createing mqtt client...")
 
 client = mqtt.Client("iMacSmall")

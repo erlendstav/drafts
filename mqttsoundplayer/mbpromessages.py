@@ -2,7 +2,13 @@ import pygame
 import paho.mqtt.client as mqtt
 import time
 
-sound_loc = "/Users/erlendstav/Documents/Private/Halloween/"
+#server_address="192.168.1.7"
+#server_address="10.218.87.156"
+server_address="localhost"
+
+sound_loc = "/Users/erlend/Halloween/Sounds/"
+#sound_loc = "/Users/erlendstav/Halloween/Sounds/"
+
 baby_laugh_sound = ""
 baby_cry_sound = ""
 scarface_laugh_sound = ""
@@ -48,9 +54,6 @@ print("Client...")
 scarface_no_mercy_sound = pygame.mixer.Sound(sound_loc + scarface_no_mercy_name)
 print("Client...")
 
-#server_address="192.168.1.7"
-#server_address="10.218.87.156"
-server_address="localhost"
 print("Client...")
 
 client = mqtt.Client("MBPro")

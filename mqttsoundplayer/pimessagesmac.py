@@ -4,7 +4,8 @@ import time
 
 #server_address="192.168.1.7"
 server_address="localhost"
-sound_loc = "/home/pi/Halloween/Sounds/"
+sound_loc = "/Users/erlend/Halloween/Sounds/"
+#sound_loc = "/Users/erlendstav/Halloween/Sounds/"
 
 eat_sound = ""
 #howl_sound = ""
