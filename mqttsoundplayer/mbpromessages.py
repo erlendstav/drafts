@@ -10,7 +10,7 @@ scarface_no_mercy_sound = ""
 
 baby_laugh_name = "baby_laugh_short.wav"
 baby_cry_name = "baby_cry.wav"
-scarface_laugh_name = "deeplaugh.mp3"
+scarface_laugh_name = "deeplaugh.wav"
 scarface_no_mercy_name = "scarface_no_mercy.wav"
 
 
@@ -43,7 +43,7 @@ time.sleep(2)
 print("Client...")
 baby_cry_sound = pygame.mixer.Sound(sound_loc + baby_cry_name)
 print("Client...")
-scarface_laugh_sound = pygame.mixer.Sound(sound_loc + scarface_no_mercy_name)
+scarface_laugh_sound = pygame.mixer.Sound(sound_loc + scarface_laugh_name)
 print("Client...")
 scarface_no_mercy_sound = pygame.mixer.Sound(sound_loc + scarface_no_mercy_name)
 print("Client...")
