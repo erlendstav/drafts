@@ -1,5 +1,7 @@
 from flask import Flask
 from flask import request
+from flask import Response
+from flask import jsonify
 
 import paho.mqtt.client as mqtt
 
@@ -27,14 +29,28 @@ def hello_world():
     return 'Hello World new! I am running on port ' + str(port)
 
 
+@app.route('/mqtt/api/pub/<topic>', methods=['GET'])
+def pub_topic(topic):
+    client.publish(topic, "MSG")
+    return topic
 
 
-@app.route('/mqtt/api/publish', methods=['POST'])
+@app.route('/mqtt/api/publish', methods=['POST', 'OPTIONS'])
 def create_task():
-    if not request.json or not 'title' in request.json:
-        abort(400)
-    client.publish(request.json['title'], "MSG")
-    return request.json
+    if request.method == 'POST':
+        if not request.json or not 'title' in request.json:
+            abort(400)
+        print("post")
+        client.publish(request.json['title'], "MSG")
+        resp = Response(request.json['title'])
+        #jsonify(title='test')) 
+        resp.headers['Access-Control-Allow-Origin'] = '*'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return resp
+    resp = Response('test')
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    return resp
 
 
 if __name__ == '__main__':
