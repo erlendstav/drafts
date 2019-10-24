@@ -2,6 +2,7 @@ from flask import Flask
 from flask import request
 from flask import Response
 from flask import jsonify
+from flask import render_template
 
 import paho.mqtt.client as mqtt
 
@@ -28,6 +29,9 @@ def on_log(client, userdata, level, buf):
 def hello_world():
     return 'Hello World new! I am running on port ' + str(port)
 
+@app.route("/remote")
+def index():
+    return render_template("remote.html")
 
 @app.route('/mqtt/api/pub/<topic>', methods=['GET'])
 def pub_topic(topic):
