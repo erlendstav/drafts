@@ -18,7 +18,7 @@ videos = {
     LVL_SCARY : ["Twisted Twins_Startle Scare1_Holl_H.mp4", "Diabolic Debutant_Startle Scare_Win_H.mp4"]
 }
 
-scare_level = lvl_friendly
+scare_level = LVL_FRIENDLY
 
 def play_video(video_name):
     print("Playing video " + video_name)
@@ -30,12 +30,15 @@ def play_video_from_level(level):
 
 
 def on_message(client, userdata, message):
+    global scare_level
     if message.topic.endswith("movement1"):
         print("Movement detected: starting video " + message.topic)
+        if scare_level == LVL_SCARY:
+            client.publish("garage/smoke", "3") # For now, integrate smoke triggering here
         play_video_from_level(scare_level)
     elif message.topic.endswith(LVL_FRIENDLY):
         scare_level = LVL_FRIENDLY
-        print("Scare level set to " + lvl_friendly)
+        print("Scare level set to " + LVL_FRIENDLY)
     elif message.topic.endswith(LVL_NORMAL):
         scare_level = LVL_NORMAL
         print("Scare level set to " + LVL_NORMAL)
@@ -47,18 +50,18 @@ def on_message(client, userdata, message):
         return
 
 def setup_mqtt():
-    client = mqtt.Client(clien_name)
-    client.on_message=on_message
-    client.connect(server_address)
-    client.loop_start()
-    return client
+    c = mqtt.Client(client_name)
+    c.on_message=on_message
+    c.connect(server_address)
+    c.loop_start()
+    return c
 
 client = setup_mqtt()
 client.subscribe("garage/#")
-client.publish("test/hello", "Hello from " + clientName)
+client.publish("test/hello", "Hello from " + client_name)
 
 while True:
     time.sleep(5)
-    client.publish("status/alive/" + clientName)
+    client.publish("status/alive/" + client_name)
 
 client.loop_stop()
