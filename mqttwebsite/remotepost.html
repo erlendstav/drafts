@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Remote MQTT</h1>
+
+<p>The onclick event is used to trigger a function when an element is clicked on.</p>
+
+<p>Click the button to trigger a function that will output "Hello World" in a p element with id="demo".</p>
+
+<button onclick="postIt('soverom/friendly')">friendly</button>
+<button onclick="postIt('soverom/scary')">scary</button>
+<button onclick="postIt('soverom/terror')">terror</button>
+<button onclick="postIt('soverom/transition1')">transition1</button>
+<button onclick="postIt('soverom/transition2')">transition2</button>
+<button onclick="postIt('soverom/pause')">pause</button>
+<button onclick="postIt('soverom/reset')">reset</button>
+
+<p id="demo"></p>
+
+<script>
+function myFunction(param) {
+  document.getElementById("demo").innerHTML = "Hello World, " + param;
+}
+</script>
+<script>
+ function UserAction(topic) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+         if (this.readyState == 4 && this.status == 200) {
+             myFunction(this.responseText);
+         }
+    };
+    xhttp.open("POST", 'http://localhost:5000/mqtt/api/publish', true);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send({ title: topic });
+}
+</script>
+<script>
+async function postIt(topic) {
+    try {
+        const data = await postData('http://localhost:5000/mqtt/api/publish', { title: topic });
+        //TODO: Fix handling of result, as it is invalid now. console.log(JSON.stringify(data));
+    } catch (error) {
+        myFunction(topic + " error " + error);
+        //TODO: Readd later? console.error(error);
+    }
+}
+
+async function postData(url = '', data = {}) {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+  return await response.json();
+}
+</script>
+
+</body>
+</html>

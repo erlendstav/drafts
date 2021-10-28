@@ -1,63 +1,75 @@
 <!DOCTYPE html>
 <html>
-<body>
+   <head>
+      <title>JavaScript MQTT WebSocket Example</title>
+	  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript">
+	 </script>
+	 <script type = "text/javascript" language = "javascript">
+		var mqtt;
+		var reconnectTimeout = 2000;
+		var host="192.168.1.50"; 
+		var port=9001; 
+		
+         function onConnect() {
+            // Once a connection has been made, make a subscription and send a message.
+	
+            showResult("Connected to "+ host);
+            console.log("Connected ");
+            //mqtt.subscribe("sensor1");
+            message = new Paho.MQTT.Message("Hello World");
+            message.destinationName = "sensor1";
+            mqtt.send(message);
+         }
+         
+         function MQTTconnect() {
+             console.log("connecting to "+ host +" "+ port);
+             mqtt = new Paho.MQTT.Client(host,port,"clientjs");
+             showResult("connecting to "+ host);
+             var options = {
+                 timeout: 3,
+                 onSuccess: onConnect,
+             };
+             
+             mqtt.connect(options); //connect
+         }
+        
+         function showResult(param) {
+             document.getElementById("demo").innerHTML = "Status: " + param;
+         }
+ 
+         
+         function postIt(topic) {
+            message = new Paho.MQTT.Message("default");
+            message.destinationName = topic;
+            mqtt.send(message);
+         }         
+	 
+	  </script>
+   </head>
 
-<h1>Remote MQTT</h1>
+    
+    <body>
 
-<p>The onclick event is used to trigger a function when an element is clicked on.</p>
+<h1>Remote trigger</h1>
 
-<p>Click the button to trigger a function that will output "Hello World" in a p element with id="demo".</p>
-
-<button onclick="postIt('soverom/friendly')">friendly</button>
-<button onclick="postIt('soverom/scary')">scary</button>
-<button onclick="postIt('soverom/terror')">terror</button>
-<button onclick="postIt('soverom/transition1')">transition1</button>
-<button onclick="postIt('soverom/transition2')">transition2</button>
-<button onclick="postIt('soverom/pause')">pause</button>
-<button onclick="postIt('soverom/reset')">reset</button>
-
+<button onclick="postIt('all/friendly')">Friendly</button>
+<button onclick="postIt('all/normal')">Normal</button>
+<button onclick="postIt('all/scary')">Scary</button>
+<p></p>
+<button onclick="postIt('all/interrupt/Shocking_Lightning')">Lightning</button>
+<button onclick="postIt('all/interrupt/Shocking_Lightning2')">Sparkle</button>
+<p></p>
+<button onclick="postIt('soverom/interrupt/Shocking_Down')">Summon and go down</button>
+<button onclick="postIt('stue/interrupt/Shocking Shade_Startle Scare_Win_H')">Summon startle</button>
+<p></p>
+<button onclick="postIt('all/reset')">Reset</button>
 <p id="demo"></p>
 
-<script>
-function myFunction(param) {
-  document.getElementById("demo").innerHTML = "Hello World, " + param;
-}
-</script>
-<script>
- function UserAction(topic) {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-         if (this.readyState == 4 && this.status == 200) {
-             myFunction(this.responseText);
-         }
-    };
-    xhttp.open("POST", 'http://localhost:5000/mqtt/api/publish', true);
-    xhttp.setRequestHeader("Content-type", "application/json");
-    xhttp.send({ title: topic });
-}
-</script>
-<script>
-async function postIt(topic) {
-    try {
-        const data = await postData('http://localhost:5000/mqtt/api/publish', { title: topic });
-        //TODO: Fix handling of result, as it is invalid now. console.log(JSON.stringify(data));
-    } catch (error) {
-        myFunction(topic + " error " + error);
-        //TODO: Readd later? console.error(error);
-    }
-}
-
-async function postData(url = '', data = {}) {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-  });
-  return await response.json();
-}
-</script>
+        
+    <script>
+	MQTTconnect();
+	</script>
+        
 
 </body>
 </html>
