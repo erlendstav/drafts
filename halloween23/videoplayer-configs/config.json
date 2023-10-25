@@ -1,0 +1,50 @@
+{
+  "node": "dragon",
+  "server" :  "192.168.0.100",
+  "scripts": [
+      {
+          "name": "wakeup",
+          "immediate": true,
+          "steps": [
+              {"action": "publish", "topic": "bat/sound/wakeup"},              
+              {"action": "publish", "topic": "ghost/sound/wakeup"},              
+              {"action": "publish", "topic": "spider/sound/wakeup"},              
+              {"action": "pause","length": 5},          
+              {"action": "publish", "topic": "smoke/puff"},              
+              {"action": "video","file": "Dragon_Wakeup.mp4"},
+              {"action": "video","file": "Black.mp4"},
+              {"action": "publish", "topic": "controller/start"},              
+          ]
+      },
+      {
+          "name": "sleepy",
+          "immediate": true,
+          "steps": [
+              {"action": "video","file": "Dragon_Sleepy.mp4"},
+              {"action": "startscript", "name": "sleeping"}              
+          ]
+      },
+      {
+          "name": "black",
+          "aftercurrentstep": true,
+          "steps": [
+              {"action": "video","file": "Black.mp4"}
+          ]
+      },
+      {
+          "name": "sleeping",
+          "steps": [
+              {"action": "video","file": "Dragon_Snoring.mp4"},
+              {"action": "video","file": "Black.mp4"},
+              {"action": "loop"}
+          ]
+      },      
+      {
+          "name": "curtain",
+          "aftercurrentstep": true,
+          "steps": [
+              {"action": "video","file": "Black.mp4"}
+          ]
+      }
+  ]
+}
