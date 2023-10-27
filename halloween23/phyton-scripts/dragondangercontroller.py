@@ -27,21 +27,28 @@ class GameState:
         print("Game state reset")
 
 
-game = GameState(0, False)
+game = GameState(0, DEFAULT_LUL_EFFECT, False)
 
 
 # accept ranges in mm
 # bat_distance_min = 200.0
 # bat_distance_max = 400.0
+NO_ARG = "hi"
 
 DISTANCE_LOW = 20
 DISTANCE_HIGH = 1000
+DISTANCE_PAUSE = 15
 
 ACCELERATION_LOW = 200
 ACCELERATION_HIGH = 400
+ACCELERATION_PAUSE = 15
 
 LIGHT_LOW = 200
 LIGHT_HIGH = 400
+LIGHT_PAUSE = 15
+
+MOTION_PAUSE = 15
+
 
 # spider_x_min = 15.0
 # spider_x_max = 30.0
@@ -54,7 +61,8 @@ LIGHT_HIGH = 400
 # Subtopics and topic prefix
 ST_PRESSED = "pressed"
 ST_TRIGGERED = "triggered"
-ST_ENABLED = "enabled" # true / false
+ST_ENABLE = "enable"
+ST_DISABLE = "disable"
 ST_RANGE_LOW = "range/low" # 0-1000
 ST_RANGE_HIGH = "range/high" # 0-1000
 ST_TRIGGER_PAUSE = "pause" # 0-100 (sec)
@@ -87,8 +95,11 @@ TOPIC_RED_BUTTON_PRESSED = TP_RED_BUTTON + "/" + ST_PRESSED
 # Outgoing messages
 
 TOPIC_DANGER_LEVEL = TP_LOCATION + "/" + ST_DANGER_LEVEL
-TOPIC_RED_BUTTON_ENABLED = TP_RED_BUTTON + "/" + ST_ENABLED
-TOPIC_WHITE_BUTTON_ENABLED = TP_WHITE_BUTTON + "/" + ST_ENABLED
+TOPIC_RED_BUTTON_ENABLE = TP_RED_BUTTON + "/" + ST_ENABLE
+TOPIC_WHITE_BUTTON_ENABLE = TP_WHITE_BUTTON + "/" + ST_ENABLE
+TOPIC_RED_BUTTON_DISABLE = TP_RED_BUTTON + "/" + ST_DISABLE
+TOPIC_WHITE_BUTTON_DISABLE = TP_WHITE_BUTTON + "/" + ST_DISABLE
+
 TOPIC_MUSIC_LULLABY = TP_MUSIC + "/lullaby"
 TOPIC_MUSIC_WAKEUP = TP_MUSIC + "/wakeup"
 
@@ -113,10 +124,17 @@ def restart_controller():
     client.publish(TP_ACCELERATION + "/" + ST_RANGE_LOW, ACCELERATION_HIGH)
     client.publish(TP_LIGHT + "/" + ST_RANGE_LOW, LIGHT_HIGH)
 
-    client.publish(TOPIC_WHITE_BUTTON_ENABLED, True)
-    client.publish(TOPIC_RED_BUTTON_ENABLED, False)
+    sleep(1)
 
-    client.publish("dragon/sleeping", "Sleep")
+    client.publish(TP_DISTANCE + "/" + ST_TRIGGER_PAUSE, DISTANCE_PAUSE)
+    client.publish(TP_ACCELERATION + "/" + ST_TRIGGER_PAUSE, ACCELERATION_PAUSE)
+    client.publish(TP_LIGHT + "/" + ST_TRIGGER_PAUSE, LIGHT_PAUSE)
+    client.publish(TP_MOTION + "/" + ST_TRIGGER_PAUSE, MOTION_PAUSE)
+
+    client.publish(TOPIC_WHITE_BUTTON_ENABLE, NO_ARG)
+    client.publish(TOPIC_RED_BUTTON_DISABLE, NO_ARG)
+
+    client.publish(TOPIC_VIDEO_SLEEPING, NO_ARG)
 
 
 def on_controller_start(mosq, obj, msg):
@@ -140,9 +158,9 @@ def on_controller_check(mosq, obj, msg):
 #        client.publish("ghost/sound/wakeup", "Hi")
 #        client.publish("spider/sound/wakeup", "Hi")
 #        sleep(5)
-        client.publish("dragon/wakeup", "Hi")
+        client.publish("dragon/wakeup", NO_ARG)
     else:
-        client.publish("dragon/sleepy", "Hi")
+        client.publish("dragon/sleepy", NO_ARG)
         sleep(2)
         game.is_waking_up = False
 
@@ -161,22 +179,22 @@ DANGER_HIGH_THRESHOLD = 98
 def update_danger_level(new_level):
     if new_level >= DANGER_HIGH_THRESHOLD:
         if game.danger_level < DANGER_HIGH_THRESHOLD:
-            client.publish(TOPIC_RED_BUTTON_ENABLED, True)
-            client.publish(TOPIC_VIDEO_SLEEPY, "hi")
+            client.publish(TOPIC_RED_BUTTON_ENABLE, NO_ARG)
+            client.publish(TOPIC_VIDEO_SLEEPY, NO_ARG)
     elif new_level < DANGER_MEDIUM_THRESHOLD:
         if game.danger_level >= DANGER_MEDIUM_THRESHOLD:
-            client.publish(TOPIC_RED_BUTTON_ENABLED, False)
-            client.publish(TOPIC_VIDEO_SLEEPING, "hi")
+            client.publish(TOPIC_RED_BUTTON_DISABLE, NO_ARG)
+            client.publish(TOPIC_VIDEO_SLEEPING, NO_ARG)
     elif (game.danger_level < DANGER_MEDIUM_THRESHOLD) or (game.danger_level >= DANGER_HIGH_THRESHOLD):
-        client.publish(TOPIC_VIDEO_SLEEPY, "hi")
-        client.publish(TOPIC_RED_BUTTON_ENABLED, False)
+        client.publish(TOPIC_VIDEO_SLEEPY, NO_ARG)
+        client.publish(TOPIC_RED_BUTTON_DISABLE, NO_ARG)
     game.danger_level = new_level
 
 
 def on_white_button_pressed(mosq, obj, msg):
     print("MESSAGES: " + msg.topic )
     if not game.is_waking_up:
-        client.publish(TOPIC_MUSIC_LULLABY, "hi")
+        client.publish(TOPIC_MUSIC_LULLABY, NO_ARG)
         game.danger_level = max(game.danger_level - game.lul_effect, 0)
         # Reduce effect of lullaby each time it is triggered
         game.lul_effect = max(game.lul_effect - 5, 0)
@@ -186,12 +204,12 @@ def on_white_button_pressed(mosq, obj, msg):
 def on_red_button_pressed(mosq, obj, msg):
     print("MESSAGES: " + msg.topic)
     game.is_waking_up = True
-    client.publish(TOPIC_MUSIC_WAKEUP, "hi")
-    client.publish(TOPIC_WHITE_BUTTON_ENABLED, False)
-    client.publish(TOPIC_RED_BUTTON_ENABLED, False)
+    client.publish(TOPIC_MUSIC_WAKEUP, NO_ARG)
+    client.publish(TOPIC_WHITE_BUTTON_DISABLE, NO_ARG)
+    client.publish(TOPIC_RED_BUTTON_DISABLE, NO_ARG)
 
     sleep(10)
-    client.publish(TOPIC_VIDEO_WAKEUP, "hi")
+    client.publish(TOPIC_VIDEO_WAKEUP, NO_ARG)
 
     sleep(30)
     restart_controller()
@@ -211,10 +229,12 @@ client.message_callback_add(TOPIC_RED_BUTTON_PRESSED, on_red_button_pressed)
 
 client.connect(server_address)
 client.loop_start()
-client.subscribe(TOPIC_CONTROLLER_START)
+client.publish("garage/distance/range/low", 0.3)
+
+#client.subscribe(TOPIC_CONTROLLER_START)
 client.subscribe(PATTERN_TRIGGERED)
-client.subscribe(TOPIC_WHITE_BUTTON_PRESSED)
-client.subscribe(TOPIC_RED_BUTTON_PRESSED)
+#client.subscribe(TOPIC_WHITE_BUTTON_PRESSED)
+#client.subscribe(TOPIC_RED_BUTTON_PRESSED)
 # sensor/distance sensor/orientation/x sensor/orientation/y sensor/light  values: "low" "high" "ok"
 
 while True:
