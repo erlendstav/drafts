@@ -143,6 +143,22 @@ def on_sensor_triggered(mosq, obj, msg):
 
 
 def update_danger_level(new_level):
+    if (new_level >= DANGER_HIGH_THRESHOLD) and (game.danger_level < DANGER_HIGH_THRESHOLD):
+        client.publish(TOPIC_RED_BUTTON_ENABLE, NO_ARG)
+    elif (new_level < DANGER_HIGH_THRESHOLD) and (game.danger_level >= DANGER_HIGH_THRESHOLD):
+        client.publish(TOPIC_RED_BUTTON_DISABLE, NO_ARG)
+
+    if (new_level >= DANGER_MEDIUM_THRESHOLD) and (game.danger_level < DANGER_MEDIUM_THRESHOLD):
+        client.publish(TOPIC_VIDEO_SLEEPY, NO_ARG)
+    elif (new_level < DANGER_MEDIUM_THRESHOLD) and (game.danger_level >= DANGER_MEDIUM_THRESHOLD):
+        client.publish(TOPIC_VIDEO_SLEEPING, NO_ARG)
+
+    game.danger_level = new_level
+    client.publish(TOPIC_DANGER_LEVEL, game.danger_level)
+
+
+'''
+def update_danger_level(new_level):
     if new_level >= DANGER_HIGH_THRESHOLD:
         if game.danger_level < DANGER_HIGH_THRESHOLD:
             client.publish(TOPIC_RED_BUTTON_ENABLE, NO_ARG)
@@ -156,7 +172,7 @@ def update_danger_level(new_level):
         client.publish(TOPIC_RED_BUTTON_DISABLE, NO_ARG)
     game.danger_level = new_level
     client.publish(TOPIC_DANGER_LEVEL, game.danger_level)
-
+'''
 
 def on_delayed_publish(topic):
     client.publish(topic, NO_ARG)
