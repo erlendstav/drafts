@@ -47,6 +47,7 @@ def play_rowrow():
 
 
 def play_wakeup():
+    pygame.mixer.stop()
     wakeup_sound.play()
 
 

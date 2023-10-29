@@ -8,8 +8,6 @@ from enum import Enum
 #server_address = "192.168.0.100"
 server_address = "localhost"
 
-
-
 SENSOR_PREFIX = "sensor/"
 
 DEFAULT_LUL_EFFECT = 25
@@ -35,12 +33,12 @@ game = GameState(0, DEFAULT_LUL_EFFECT, False)
 # bat_distance_max = 400.0
 NO_ARG = "hi"
 
-DISTANCE_LOW = 20
+DISTANCE_LOW = 60
 DISTANCE_HIGH = 1000
 DISTANCE_PAUSE = 15
 
-ACCELERATION_LOW = 200
-ACCELERATION_HIGH = 400
+ACCELERATION_LOW = 0.1
+ACCELERATION_HIGH = 0.99
 ACCELERATION_PAUSE = 15
 
 LIGHT_LOW = 200
@@ -106,6 +104,8 @@ TOPIC_MUSIC_WAKEUP = TP_MUSIC + "/wakeup"
 TOPIC_VIDEO_SLEEPING = TP_DRAGON + "/sleeping"
 TOPIC_VIDEO_SLEEPY = TP_DRAGON + "/sleepy"
 TOPIC_VIDEO_WAKEUP = TP_DRAGON + "/wakeup"
+
+TOPIC_LEDSTRIP_FIRE = TP_LOCATION + "ledstrip/fire"  # arg: int number of times to repeat (approx number of sec)
 
 
 def restart_controller():
@@ -231,11 +231,10 @@ client.connect(server_address)
 client.loop_start()
 client.publish("garage/distance/range/low", 0.3)
 
-#client.subscribe(TOPIC_CONTROLLER_START)
+client.subscribe(TOPIC_CONTROLLER_START)
 client.subscribe(PATTERN_TRIGGERED)
-#client.subscribe(TOPIC_WHITE_BUTTON_PRESSED)
-#client.subscribe(TOPIC_RED_BUTTON_PRESSED)
-# sensor/distance sensor/orientation/x sensor/orientation/y sensor/light  values: "low" "high" "ok"
+client.subscribe(TOPIC_WHITE_BUTTON_PRESSED)
+client.subscribe(TOPIC_RED_BUTTON_PRESSED)
 
 while True:
     sleep(5)
