@@ -4,6 +4,7 @@ from time import sleep
 import os
 import json
 from enum import Enum
+import threading
 
 #server_address = "192.168.0.100"
 server_address = "localhost"
@@ -28,9 +29,6 @@ class GameState:
 game = GameState(0, DEFAULT_LUL_EFFECT, False)
 
 
-# accept ranges in mm
-# bat_distance_min = 200.0
-# bat_distance_max = 400.0
 NO_ARG = "hi"
 
 DISTANCE_LOW = 60
@@ -47,14 +45,13 @@ LIGHT_PAUSE = 15
 
 MOTION_PAUSE = 15
 
+DANGER_MEDIUM_THRESHOLD = 60
+DANGER_HIGH_THRESHOLD = 98
 
-# spider_x_min = 15.0
-# spider_x_max = 30.0
-# spider_y_min = 15.0
-# spider_y_max = 30.0
-
-# box_light_min = 30.0
-# box_light_max = 70.0
+PAUSE_FOR_WHITE_BUTTON_REENABLE = 5
+PAUSE_BETWEEN_WAKEUP_MUSIC_AND_VIDEO = 10
+PAUSE_BETWEEN_WAKEUP_MUSIC_AND_SMOKE = 15
+PAUSE_FROM_START_OF_WAKEUP_TO_RESTART = 30
 
 # Subtopics and topic prefix
 ST_PRESSED = "pressed"
@@ -105,8 +102,8 @@ TOPIC_VIDEO_SLEEPING = TP_DRAGON + "/sleeping"
 TOPIC_VIDEO_SLEEPY = TP_DRAGON + "/sleepy"
 TOPIC_VIDEO_WAKEUP = TP_DRAGON + "/wakeup"
 
-TOPIC_LEDSTRIP_FIRE = TP_LOCATION + "ledstrip/fire"  # arg: int number of times to repeat (approx number of sec)
-
+TOPIC_LEDSTRIP_FIRE = TP_LOCATION + "/ledstrip/fire"  # arg: int number of times to repeat (approx number of sec)
+TOPIC_SMOKE = "smoke/puff/long" # smoke/puff/medium
 
 def restart_controller():
     game.reset()
@@ -118,13 +115,9 @@ def restart_controller():
     client.publish(TP_ACCELERATION + "/" + ST_RANGE_LOW, ACCELERATION_LOW)
     client.publish(TP_LIGHT + "/" + ST_RANGE_LOW, LIGHT_LOW)
 
-    sleep(1)
-
     client.publish(TP_DISTANCE + "/" + ST_RANGE_HIGH, DISTANCE_HIGH)
     client.publish(TP_ACCELERATION + "/" + ST_RANGE_LOW, ACCELERATION_HIGH)
     client.publish(TP_LIGHT + "/" + ST_RANGE_LOW, LIGHT_HIGH)
-
-    sleep(1)
 
     client.publish(TP_DISTANCE + "/" + ST_TRIGGER_PAUSE, DISTANCE_PAUSE)
     client.publish(TP_ACCELERATION + "/" + ST_TRIGGER_PAUSE, ACCELERATION_PAUSE)
@@ -142,45 +135,18 @@ def on_controller_start(mosq, obj, msg):
     restart_controller()
 
 
-def on_controller_check(mosq, obj, msg):
-    if game.is_waking_up:
-        return
-    game.is_waking_up = True
-    print("MESSAGES: " + msg.topic + " " + str(msg.payload))
-    print("Sensor status : ", game.sensors)
-#   print("Bat distance : ", bat_status, " ", game.bat_distance)
-#    print("Spider x     : ", spider_x_status, " ", game.spider_x)
-#    print("Spider y     : ", spider_y_status, " ", game.spider_y)
-#    print("Box light    : ", box_light_status, " ", game.box_light)
-#    if bat_status == spider_x_status == spider_y_status == box_light_status == RangeStatus.OK:
-    if all(x == RangeStatus.OK for x in game.sensors.values()):
-#        client.publish("bat/sound/wakeup", "Hi")
-#        client.publish("ghost/sound/wakeup", "Hi")
-#        client.publish("spider/sound/wakeup", "Hi")
-#        sleep(5)
-        client.publish("dragon/wakeup", NO_ARG)
-    else:
-        client.publish("dragon/sleepy", NO_ARG)
-        sleep(2)
-        game.is_waking_up = False
-
-
 def on_sensor_triggered(mosq, obj, msg):
     print("MESSAGES: " + msg.topic )
     if not game.is_waking_up:
-        game.danger_level = min(game.danger_level + 25, 100)
-        client.publish(TOPIC_DANGER_LEVEL, game.danger_level)
-
-
-DANGER_MEDIUM_THRESHOLD = 60
-DANGER_HIGH_THRESHOLD = 98
+        # game.danger_level = min(game.danger_level + 25, 100)
+        update_danger_level(min(game.danger_level + 25, 100))
 
 
 def update_danger_level(new_level):
     if new_level >= DANGER_HIGH_THRESHOLD:
         if game.danger_level < DANGER_HIGH_THRESHOLD:
             client.publish(TOPIC_RED_BUTTON_ENABLE, NO_ARG)
-            client.publish(TOPIC_VIDEO_SLEEPY, NO_ARG)
+            client.publish(TOPIC_VIDEO_SLEEPY, NO_ARG)   # Should have been almost awake video
     elif new_level < DANGER_MEDIUM_THRESHOLD:
         if game.danger_level >= DANGER_MEDIUM_THRESHOLD:
             client.publish(TOPIC_RED_BUTTON_DISABLE, NO_ARG)
@@ -189,16 +155,27 @@ def update_danger_level(new_level):
         client.publish(TOPIC_VIDEO_SLEEPY, NO_ARG)
         client.publish(TOPIC_RED_BUTTON_DISABLE, NO_ARG)
     game.danger_level = new_level
+    client.publish(TOPIC_DANGER_LEVEL, game.danger_level)
+
+
+def on_delayed_publish(topic):
+    client.publish(topic, NO_ARG)
+
+
+def publish_with_delay(topic, delay):
+    ti = threading.Timer(delay, on_delayed_publish, args=(topic,))
+    ti.start()
 
 
 def on_white_button_pressed(mosq, obj, msg):
     print("MESSAGES: " + msg.topic )
     if not game.is_waking_up:
         client.publish(TOPIC_MUSIC_LULLABY, NO_ARG)
-        game.danger_level = max(game.danger_level - game.lul_effect, 0)
+        new_level = max(game.danger_level - game.lul_effect, 0)
         # Reduce effect of lullaby each time it is triggered
         game.lul_effect = max(game.lul_effect - 5, 0)
-        client.publish(TOPIC_DANGER_LEVEL, game.danger_level)
+        publish_with_delay(TOPIC_WHITE_BUTTON_ENABLE, PAUSE_FOR_WHITE_BUTTON_REENABLE)
+        update_danger_level(new_level)
 
 
 def on_red_button_pressed(mosq, obj, msg):
@@ -208,11 +185,10 @@ def on_red_button_pressed(mosq, obj, msg):
     client.publish(TOPIC_WHITE_BUTTON_DISABLE, NO_ARG)
     client.publish(TOPIC_RED_BUTTON_DISABLE, NO_ARG)
 
-    sleep(10)
-    client.publish(TOPIC_VIDEO_WAKEUP, NO_ARG)
-
-    sleep(30)
-    restart_controller()
+    publish_with_delay(TOPIC_VIDEO_WAKEUP, PAUSE_BETWEEN_WAKEUP_MUSIC_AND_VIDEO)
+    publish_with_delay(TOPIC_SMOKE, PAUSE_BETWEEN_WAKEUP_MUSIC_AND_SMOKE)
+    publish_with_delay(TOPIC_LEDSTRIP_FIRE, PAUSE_BETWEEN_WAKEUP_MUSIC_AND_SMOKE)
+    publish_with_delay(TOPIC_CONTROLLER_START, PAUSE_FROM_START_OF_WAKEUP_TO_RESTART)
 
 
 def on_message(client, userdata, message):
@@ -229,12 +205,13 @@ client.message_callback_add(TOPIC_RED_BUTTON_PRESSED, on_red_button_pressed)
 
 client.connect(server_address)
 client.loop_start()
-client.publish("garage/distance/range/low", 0.3)
+client.publish("test/dragondangercontroller/starting", NO_ARG)
 
 client.subscribe(TOPIC_CONTROLLER_START)
 client.subscribe(PATTERN_TRIGGERED)
 client.subscribe(TOPIC_WHITE_BUTTON_PRESSED)
 client.subscribe(TOPIC_RED_BUTTON_PRESSED)
+restart_controller()
 
 while True:
     sleep(5)
