@@ -8,7 +8,8 @@ server_address = "192.168.0.100"
 
 # Sound
 #SPEAKERS = 'Jabra SPEAK 510 USB'
-SPEAKERS = 'aFUNK'
+# SPEAKERS = 'aFUNK'
+SPEAKERS = 'External Headphones'
 # SPEAKERS = 'aMOVE'
 # SPEAKERS = 'JBL Clip 2'
 

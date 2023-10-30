@@ -9,7 +9,10 @@ server_address = "192.168.0.100"
 # Sound
 #SPEAKERS = 'Jabra SPEAK 510 USB'
 #SPEAKERS = 'aFUNK'
-SPEAKERS = 'aMOVE'
+#SPEAKERS = 'aMOVE'
+#
+SPEAKERS = 'SRS-XB43'
+# SPEAKERS = 'External Headphones'
 # SPEAKERS = 'JBL Clip 2'
 
 SOUND_LOC = os.getcwd() + "/"
@@ -18,7 +21,7 @@ TWINKLE2_SOUND_NAME = "Twinkle2.mp3"
 ROCKABY_SOUND_NAME = "Rockaby.mp3"
 ROWROW_SOUND_NAME = "Rowrow.mp3"
 
-WAKEUP_SOUND_NAME = "Smoke.mp3"
+WAKEUP_SOUND_NAME = "SmokeIntro.mp3"
 
 TP_LOCATION = "garage"
 TP_MUSIC = TP_LOCATION + "/music"
@@ -70,7 +73,7 @@ def on_message(client, userdata, message):
     print("topic : ", message.topic + " ignored")
 
 
-pygame.mixer.init() #devicename=SPEAKERS)
+pygame.mixer.init(devicename=SPEAKERS)
 print("Devices")
 print(sdl2.audio.get_audio_device_names(False))
 twinkle1_sound = pygame.mixer.Sound(SOUND_LOC + TWINKLE1_SOUND_NAME)
@@ -81,20 +84,20 @@ lullaby_list = [twinkle1_sound, rowrow_sound, twinkle2_sound, rockaby_sound]
 cr_lullaby = 0
 wakeup_sound = pygame.mixer.Sound(SOUND_LOC + WAKEUP_SOUND_NAME)
 
-on_lullaby(" ", " ", " ")
-sleep(7)
-on_lullaby(" ", " ", " ")
-sleep(7)
-on_lullaby(" ", " ", " ")
-sleep(7)
-on_lullaby(" ", " ", " ")
-sleep(7)
+#on_lullaby(" ", " ", " ")
+#sleep(7)
+#on_lullaby(" ", " ", " ")
+#sleep(7)
+#on_lullaby(" ", " ", " ")
+#sleep(7)
+#on_lullaby(" ", " ", " ")
+#sleep(7)
 on_lullaby(" ", " ", " ")
 sleep(7)
 print("Played lullaby sounds")
 play_wakeup()
 sleep(7)
-print("Played wakeup sound")
+#print("Played wakeup sound")
 
 client = mqtt.Client(CLIENT_NAME)
 client.on_message=on_message

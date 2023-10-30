@@ -9,7 +9,10 @@ server_address = "192.168.0.100"
 # Sound
 #SPEAKERS = 'Jabra SPEAK 510 USB'
 #SPEAKERS = 'aFUNK'
-SPEAKERS = 'aMOVE'
+#SPEAKERS = 'aSOUND'
+#SPEAKERS = 'External Headphones'
+SPEAKERS = 'Jabra SPEAK 510 USB'
+#SPEAKERS = 'aMOVE'
 # SPEAKERS = 'JBL Clip 2'
 
 SOUND_LOC = os.getcwd() + "/"

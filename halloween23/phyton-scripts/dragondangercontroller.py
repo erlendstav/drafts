@@ -33,17 +33,17 @@ NO_ARG = "hi"
 
 DISTANCE_LOW = 60
 DISTANCE_HIGH = 1000
-DISTANCE_PAUSE = 15
+DISTANCE_PAUSE = 10
 
-ACCELERATION_LOW = 0.1
+ACCELERATION_LOW = 0.2
 ACCELERATION_HIGH = 0.99
-ACCELERATION_PAUSE = 15
+ACCELERATION_PAUSE = 10
 
 LIGHT_LOW = 200
 LIGHT_HIGH = 400
-LIGHT_PAUSE = 15
+LIGHT_PAUSE = 10
 
-MOTION_PAUSE = 15
+MOTION_PAUSE = 10
 
 DANGER_MEDIUM_THRESHOLD = 60
 DANGER_HIGH_THRESHOLD = 98
@@ -81,6 +81,8 @@ TOPIC_CONTROLLER_START = TP_LOCATION + "/controller/start"
 PATTERN_TRIGGERED = TP_LOCATION + "/+/" + ST_TRIGGERED
 TOPIC_WHITE_BUTTON_PRESSED = TP_WHITE_BUTTON + "/" + ST_PRESSED
 TOPIC_RED_BUTTON_PRESSED = TP_RED_BUTTON + "/" + ST_PRESSED
+TOPIC_DANGER_TIMER = TP_LOCATION + "/dangertimer"
+
 #TOPIC_RED_BUTTON_TRIGGERED = "garage/redbutton/triggered"
 #TOPIC_DISTANCE_TRIGGERED = "garage/distance/triggered"
 #TOPIC_MOTION_TRIGGERED = "garage/motion/triggered"
@@ -207,6 +209,12 @@ def on_red_button_pressed(mosq, obj, msg):
     publish_with_delay(TOPIC_CONTROLLER_START, PAUSE_FROM_START_OF_WAKEUP_TO_RESTART)
 
 
+def on_danger_timer(mosq, obj, msg):
+    if not game.is_waking_up:
+        if game.danger_level < 100:
+            update_danger_level(min(game.danger_level + 10, 100))
+
+
 def on_message(client, userdata, message):
     print("topic : ", message.topic)    
     
@@ -218,6 +226,7 @@ client.message_callback_add(TOPIC_CONTROLLER_START, on_controller_start)
 client.message_callback_add(PATTERN_TRIGGERED, on_sensor_triggered)
 client.message_callback_add(TOPIC_WHITE_BUTTON_PRESSED, on_white_button_pressed)
 client.message_callback_add(TOPIC_RED_BUTTON_PRESSED, on_red_button_pressed)
+client.message_callback_add(TOPIC_DANGER_TIMER, on_danger_timer)
 
 client.connect(server_address)
 client.loop_start()
@@ -227,6 +236,7 @@ client.subscribe(TOPIC_CONTROLLER_START)
 client.subscribe(PATTERN_TRIGGERED)
 client.subscribe(TOPIC_WHITE_BUTTON_PRESSED)
 client.subscribe(TOPIC_RED_BUTTON_PRESSED)
+client.subscribe(TOPIC_DANGER_TIMER)
 restart_controller()
 
 while True:
