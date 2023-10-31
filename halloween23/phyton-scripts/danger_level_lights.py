@@ -55,6 +55,8 @@ SCARY_TOPIC = "scary"
 WIND_ON_TOPIC = "windon"
 WIND_OFF_TOPIC = "windoff"
 
+SCENES = ["DangerGreen", "DangerGreenYellow", "DangerYellow", "DangerOrange", "DangerRed"]
+
 FRIENDLY_MODE = 0
 NORMAL_MODE = 1
 SCARY_MODE = 2
@@ -81,11 +83,15 @@ def wind(ison):
 
 def on_message(client, userdata, message):
     print("topic : ", message.topic)
-    danger = float(message.payload)
-    red_amount = round(danger*2.55)
-    xy = converter.rgb_to_xy(red_amount, 255-red_amount, 0)
-    light_named["Hue Play 1"].on = True
-    light_named["Hue Play 1"].xy = xy
+    danger = int(message.payload)
+    print("danger is : ", danger)
+    colorindex = min(danger // 20, 4)
+    print("colorindex is : ", colorindex)
+    b.run_scene(ROOM_GARAGE, SCENES[colorindex])
+    #red_amount = round(danger*2.55)
+    #xy = converter.rgb_to_xy(red_amount, 255-red_amount, 0)
+    #light_named["Hue Play 1"].on = True
+    #light_named["Hue Play 1"].xy = xy
 
 
 def friendly_sequence():
@@ -134,12 +140,12 @@ def main_loop():
         friendly_sequence()
 
 
-client = mqtt.Client("GarageLightController")
+client = mqtt.Client("DangerLevelLights")
 client.on_message=on_message
 client.connect(server_address)
 client.loop_start()
 client.subscribe("garage/dangerlevel")
-client.publish("topic/state", "Hello from GarageLightController")
+client.publish("topic/state", "Hello from DangerLevelLights")
 print("Connected to MQTT")
 
 converter = Converter()

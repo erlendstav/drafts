@@ -107,6 +107,9 @@ TOPIC_VIDEO_WAKEUP = TP_DRAGON + "/wakeup"
 TOPIC_LEDSTRIP_FIRE = TP_LOCATION + "/ledstrip/fire"  # arg: int number of times to repeat (approx number of sec)
 TOPIC_SMOKE = "smoke/puff/long" # smoke/puff/medium
 
+CLIENT_NAME = "DragonDangerController"
+
+
 def restart_controller():
     game.reset()
 
@@ -219,7 +222,7 @@ def on_message(client, userdata, message):
     print("topic : ", message.topic)    
     
     
-client = mqtt.Client("MainController")
+client = mqtt.Client(CLIENT_NAME)
 client.on_message=on_message
 
 client.message_callback_add(TOPIC_CONTROLLER_START, on_controller_start)
