@@ -23,6 +23,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
+from typing_extensions import Literal
 
 import paho.mqtt.client as mqtt
 
