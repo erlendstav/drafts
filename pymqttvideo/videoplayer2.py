@@ -103,7 +103,7 @@ class PlaybackController:
 	def __init__(self, video_dir: Path) -> None:
 		self.video_dir = video_dir
 		self.library = VideoLibrary(video_dir)
-		vlc_args = ["--no-video-title-show", "--fullscreen") #, "-I macosx"]
+		vlc_args = ["--no-video-title-show", "--fullscreen"] #, "-I macosx"]
 		#if platform.system() == "Darwin":
 		#	vlc_args.extend(["--vout=macosx", "--aout=coreaudio", "--intf", "dummy"])
 		self._vlc_instance = vlc.Instance(*vlc_args)
