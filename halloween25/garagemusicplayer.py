@@ -11,6 +11,9 @@ server_address="192.168.1.50"
 #SPEAKERS = 'Jabra SPEAK 510 USB'
 #SPEAKERS = 'aFUNK'
 #SPEAKERS = 'aMOVE'
+#SPEAKERS = 'aSOUND'
+#SPEAKERS = 'LS27A600U'
+#SPEAKERS = 'MacBook Pro Speakers'
 #
 #SPEAKERS = 'SRS-XB43'
 # SPEAKERS = 'External Headphones'
