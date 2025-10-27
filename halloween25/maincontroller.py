@@ -40,7 +40,7 @@ TOPIC_MUSIC_SCARY = TOPIC_LOCATION + "/music/scary"
 TOPIC_MUSIC_STOP = TOPIC_LOCATION + "/music/stop"
 
 # Timing constants
-SUMMON_EFFECT_DURATION = 8  # seconds
+SUMMON_EFFECT_DURATION = 15 # seconds
 MOVEMENT_IGNORE_DURATION = 15  # seconds
 
 start_time = time.time()
