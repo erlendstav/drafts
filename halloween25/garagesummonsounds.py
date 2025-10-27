@@ -24,13 +24,13 @@ FRIENDLY_SOUND_NAME = "summon_friendly.mp3"
 SCARY_SOUND_NAME = "summon_scary.mp3"
 
 TP_LOCATION = "garage"
-TP_MUSIC = TP_LOCATION + "/summonsound"
+TP_SOUND = TP_LOCATION + "/sound/summon"
 
 #SENSOR_TOPIC = "sensor/distance"
-FRIENDLY_MUSIC_TOPIC = TP_MUSIC + "/friendly"
-SCARY_MUSIC_TOPIC= TP_MUSIC + "/scary"
-STOP_MUSIC_TOPIC= TP_MUSIC + "/stop"
-SUBSCRIBE_TOPIC = TP_MUSIC + "/#"
+FRIENDLY_SOUND_TOPIC = TP_SOUND + "/friendly"
+SCARY_SOUND_TOPIC= TP_SOUND + "/scary"
+STOP_SOUND_TOPIC= TP_SOUND + "/stop"
+SUBSCRIBE_TOPIC = TP_SOUND + "/#"
 CLIENT_NAME = "GarageSummonSounds"
 
 
@@ -84,9 +84,9 @@ stop_music()
 
 client = mqtt.Client(client_id=CLIENT_NAME)
 client.on_message=on_message
-client.message_callback_add(SCARY_MUSIC_TOPIC, on_play_scary)
-client.message_callback_add(FRIENDLY_MUSIC_TOPIC, on_play_friendly)
-client.message_callback_add(STOP_MUSIC_TOPIC, on_stop_music)
+client.message_callback_add(SCARY_SOUND_TOPIC, on_play_scary)
+client.message_callback_add(FRIENDLY_SOUND_TOPIC, on_play_friendly)
+client.message_callback_add(STOP_SOUND_TOPIC, on_stop_music)
 
 client.connect(server_address)
 client.loop_start()
