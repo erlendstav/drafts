@@ -8,7 +8,7 @@ import os
 server_address="192.168.1.50"
 
 # Sound
-#SPEAKERS = 'Jabra SPEAK 510 USB'
+SPEAKERS = 'Jabra SPEAK 510 USB'
 #SPEAKERS = 'aFUNK'
 #SPEAKERS = 'aMOVE'
 #SPEAKERS = 'aSOUND'
@@ -67,7 +67,7 @@ def on_message(client, userdata, message):
     print("topic : ", message.topic + " ignored")
 
 
-pygame.mixer.init() #devicename=SPEAKERS)
+pygame.mixer.init(devicename=SPEAKERS)
 print("Devices")
 print(sdl2.audio.get_audio_device_names(False))
 friendly_sound = pygame.mixer.Sound(SOUND_LOC + FRIENDLY_MUSIC_NAME)
