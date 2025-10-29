@@ -11,6 +11,7 @@ TOPIC_MUSIC = TOPIC_LOCATION + "/music"
 TOPIC_LIGHT = TOPIC_LOCATION + "/light"
 TOPIC_SOUND = TOPIC_LOCATION + "/sound"
 TOPIC_START = TOPIC_LOCATION + "/start"
+TOPIC_RESET = TOPIC_LOCATION + "/reset"
 
 # Scare levels
 LVL_FRIENDLY = "friendly"
@@ -110,6 +111,8 @@ def on_movement(mosq, obj, msg):
 def on_video_done(mosq, obj, msg):
     print("MESSAGES: " + msg.topic)
     client.publish(TOPIC_LIGHT_EXIT, "1")
+    time.sleep(5)
+    client.publish(TOPIC_RESET, "1")
 
 
 def on_message(client, userdata, message):
